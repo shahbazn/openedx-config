@@ -1,0 +1,24 @@
+{
+	"builders": [{
+		"type": "amazon-ebs",
+		"instance_type": "m3.large",
+		"region": "eu-central-1",
+		"ami_name": "edxapp-alpha-{{isotime | clean_ami_name}}",
+		"source_ami": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*",
+		"ssh_username": "ubuntu",
+		"ami_description": "EdxAPP sanbox single machine",
+		"security_group_id": "sg-29b8c542",
+		"tags": {
+			"deployment": "test-deployment",
+			"play": "edx_sandbox.yml"
+		}
+	}],
+	"provisioners": [{
+		"type": "shell",
+		"inline": [
+			"export OPENEDX_RELEASE=the-tag/you-want-to-install",
+			"wget https://raw.githubusercontent.com/edx/configuration/$OPENEDX_RELEASE/util/install/ansible-bootstrap.sh -O - | sudo bash",
+			"wget https://raw.githubusercontent.com/edx/configuration/$OPENEDX_RELEASE/util/install/generate-passwords.sh -O - | bash",
+			"wget https://raw.githubusercontent.com/edx/configuration/$OPENEDX_RELEASE/util/install/sandbox.sh -O - | bash"]
+	}]
+}

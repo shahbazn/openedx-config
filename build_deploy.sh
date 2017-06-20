@@ -1,8 +1,6 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 set -e
-
-e
 
 function usage()
 {
@@ -12,9 +10,9 @@ function usage()
 	echo "	-h --help"
 	echo "    --access-key=AWS_ACCESS_KEY_ID"
     echo "    --access-secret=AWS_SECRET_ACCESS_KEY"
-    echo "	  --edx-platform-repo=CUSTOM_EDX_PLATFORM_REPO"
-    echo "	  --theme-repo=EDX_CUSTOM_THEME_REPO"
-    echo "	  --sudo-passwd=SUDO_PASSWORD"
+    echo "    --edx-platform-repo=CUSTOM_EDX_PLATFORM_REPO"
+    echo "    --theme-repo=EDX_CUSTOM_THEME_REPO"
+    echo "    --sudo-password=SUDO_PASSWORD"
     echo ""
 }
 
@@ -46,7 +44,7 @@ do
 		--theme-repo)
 			EDX_THEME=$VALUE
 			;;
-		--passwd)
+		--sudo-password)
 			PASSWD=$VALUE
 			;;
 		*)
@@ -54,9 +52,11 @@ do
 			usage
 			exit 1
 			;;
-	ecase
+	esac
 	shift
 done
+
+BASE_DIR=$(pwd)
 
 # Set Environment variables
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -68,6 +68,11 @@ export EDX_THEME=$EDX_THEME
 echo $PASSWD | sudo -S apt-get update
 echo $PASSWD | sudo -S apt-get install unzip
 
-# install compatible Packer release
-curl -L $PACKER_URL -o /var/tmp/packer.zip
+# Install compatible Packer release
+curl -L https://releases.hashicorp.com/packer/1.0.0/packer_1.0.0_linux_amd64.zip -o /var/tmp/packer.zip
 echo $PASSWD | sudo -S unzip -o /var/tmp/packer.zip -d /usr/local/bin
+
+# Build image
+echo $AWS_ACCESS_KEY_ID
+echo $AWS_SECRET_ACCESS_KEY
+packer build ${BASE_DIR}/packer/edxapp.json
